@@ -1,5 +1,5 @@
-function initialCommit(name: string) {
-  return `Hello ${name}`;
-}
+import { Chessboard } from "./chessboard.js";
 
-console.log(initialCommit("John"));
+const cb = new Chessboard("board", 8);
+
+cb.drawBoard();

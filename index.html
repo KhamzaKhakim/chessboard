@@ -1,0 +1,15 @@
+<html>
+  <head>
+    <title>Chessboard</title>
+  </head>
+  <body>
+    <p>Chessboard in dev</p>
+    <p id="playerName"></p>
+    <canvas id="board" width="480" height="480"></canvas>
+    <script type="module">
+      import { Chessboard } from "./dist/chessboard.js";
+      const cb = new Chessboard("board", 8);
+      cb.drawBoard();
+    </script>
+  </body>
+</html>
