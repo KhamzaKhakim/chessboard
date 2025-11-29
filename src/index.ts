@@ -1,5 +1,5 @@
-import { Chessboard } from "./chessboard.js";
+// import { Chessboard } from "./chessboard.js";
 
-const cb = new Chessboard("board", 8);
+// const cb = new Chessboard("board", 8);
 
-cb.drawBoard();
+// cb.drawBoard();

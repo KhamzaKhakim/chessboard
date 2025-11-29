@@ -1,19 +1,24 @@
+import { drawPiecesFromFen, preloadPieces } from "./image.js";
+import { pieces } from "./types.js";
+import { startPositon } from "./utils.js";
+
 export class Chessboard {
   ref: string;
   size: number;
+  fen: string;
+  svgPieces: Record<string, HTMLImageElement> | null = null;
 
-  constructor(ref: string, size: number) {
+  constructor(ref: string, size: number, fen: string = startPositon) {
     this.ref = ref;
     this.size = size;
+    this.fen = fen;
   }
 
-  drawBoard() {
+  async drawBoard() {
     const canvas = document.getElementById(this.ref) as HTMLCanvasElement;
     const ctx = canvas.getContext("2d")!;
 
     const TILE = canvas.width / this.size;
-
-    console.log(this.size);
 
     for (let r = 0; r < this.size; r++) {
       for (let c = 0; c < this.size; c++) {
@@ -21,5 +26,12 @@ export class Chessboard {
         ctx.fillRect(c * TILE, r * TILE, TILE, TILE);
       }
     }
+
+    //preloadPieces;
+    if (!this.svgPieces || !this.svgPieces.size) {
+      this.svgPieces = await preloadPieces(pieces);
+    }
+
+    drawPiecesFromFen(this.fen, ctx, TILE, this.svgPieces);
   }
 }

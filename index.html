@@ -8,7 +8,11 @@
     <canvas id="board" width="480" height="480"></canvas>
     <script type="module">
       import { Chessboard } from "./dist/chessboard.js";
-      const cb = new Chessboard("board", 8);
+      const cb = new Chessboard(
+        "board",
+        8,
+        "r1bk3r/p2pBpNp/n4n2/1p1NP2P/6P1/3P4/P1P1K3/q5b1",
+      );
       cb.drawBoard();
     </script>
   </body>
