@@ -1,5 +1,5 @@
 //fen notation, lowercase letters for black pieces, uppercase letters for white pieces
-export const pieces = [
+export const FEN_PIECES = [
   "k", //black king
   "q", // black queen
   "r", //black rook
@@ -14,4 +14,11 @@ export const pieces = [
   "P", //white pawn
 ] as const;
 
-export type Piece = (typeof pieces)[number];
+export type FenPiece = (typeof FEN_PIECES)[number];
+
+export type BoardPiece = {
+  start: string;
+  fenPiece: FenPiece;
+  col: number;
+  row: number;
+};

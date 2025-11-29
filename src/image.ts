@@ -1,11 +1,11 @@
-import { Piece } from "./types.js";
+import { FenPiece } from "./types.js";
 import { pieceToSvgName } from "./utils.js";
 
 export function drawPiecesFromFen(
   fen: string,
   ctx: CanvasRenderingContext2D,
   tileWidth: number,
-  images: Record<Piece, HTMLImageElement>,
+  images: Record<FenPiece, HTMLImageElement>,
 ) {
   //TODO: add error checks
 
@@ -16,12 +16,10 @@ export function drawPiecesFromFen(
     row,
     col,
   }: {
-    piece: Piece;
+    piece: FenPiece;
     row: number;
     col: number;
   }) {
-    console.log("Drawing: " + JSON.stringify({ piece, row, col }));
-
     ctx.drawImage(
       images[piece],
       col * tileWidth,
@@ -42,7 +40,7 @@ export function drawPiecesFromFen(
         continue;
       }
 
-      drawPiece({ piece: row[idx] as Piece, row: i, col });
+      drawPiece({ piece: row[idx] as FenPiece, row: i, col });
       idx++;
       col++;
     }
@@ -50,12 +48,12 @@ export function drawPiecesFromFen(
 }
 
 export async function preloadPieces(
-  pieces: readonly Piece[],
-): Promise<Record<Piece, HTMLImageElement>> {
+  pieces: readonly FenPiece[],
+): Promise<Record<FenPiece, HTMLImageElement>> {
   const entries = await Promise.all(
     pieces.map(
       (piece) =>
-        new Promise<[Piece, HTMLImageElement]>((resolve, reject) => {
+        new Promise<[FenPiece, HTMLImageElement]>((resolve, reject) => {
           const img = new Image();
           img.src = `./assets/${pieceToSvgName[piece]}.svg`;
 
@@ -66,5 +64,5 @@ export async function preloadPieces(
     ),
   );
 
-  return Object.fromEntries(entries) as Record<Piece, HTMLImageElement>;
+  return Object.fromEntries(entries) as Record<FenPiece, HTMLImageElement>;
 }

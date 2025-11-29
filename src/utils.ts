@@ -1,6 +1,6 @@
-import { pieces } from "./types.js";
+import { FenPiece, FEN_PIECES } from "./types.js";
 
-export const pieceToName: Record<(typeof pieces)[number], string> = {
+export const pieceToName: Record<(typeof FEN_PIECES)[number], string> = {
   k: "black king",
   q: "black queen",
   r: "black rook",
@@ -15,7 +15,7 @@ export const pieceToName: Record<(typeof pieces)[number], string> = {
   P: "white pawn",
 };
 
-export const pieceToSvgName: Record<(typeof pieces)[number], string> = {
+export const pieceToSvgName: Record<(typeof FEN_PIECES)[number], string> = {
   k: "bk",
   q: "bq",
   r: "br",
@@ -31,3 +31,35 @@ export const pieceToSvgName: Record<(typeof pieces)[number], string> = {
 };
 
 export const startPositon = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+
+export function iteratePieces(
+  fen: string,
+  callback: ({
+    fenPiece,
+    row,
+    col,
+  }: {
+    fenPiece: FenPiece;
+    row: number;
+    col: number;
+  }) => void,
+) {
+  const rows = fen.split("/");
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    let col = 0,
+      idx = 0;
+    while (row[idx]) {
+      if (/\d/.test(row[idx])) {
+        col += Number(row[idx]);
+        idx++;
+        continue;
+      }
+
+      callback({ fenPiece: row[idx] as FenPiece, row: i, col });
+      idx++;
+      col++;
+    }
+  }
+}
