@@ -1,6 +1,6 @@
 import { drawPiecesFromFen, preloadPieces } from "./image.js";
 import { BoardPiece, FEN_PIECES } from "./types.js";
-import { iteratePieces, startPositon } from "./utils.js";
+import { getCellFromMouse, iteratePieces, startPositon } from "./utils.js";
 
 export class Chessboard {
   ref: string;
@@ -11,6 +11,7 @@ export class Chessboard {
   ctx: CanvasRenderingContext2D;
   pieces: BoardPiece[] = [];
   tileSize: number;
+  isDragging = false;
 
   constructor(ref: string, size: number = 8, fen: string = startPositon) {
     this.ref = ref;
@@ -55,6 +56,8 @@ export class Chessboard {
 
     //add event listeneres for canvas
     this.canvas.onmousedown = (e) => this.mouseDownHandler(e);
+    this.canvas.onmouseup = (e) => this.mouseUpHandler(e);
+    this.canvas.onmouseout = (e) => this.mouseOutHandler(e);
   }
 
   draw() {
@@ -82,20 +85,44 @@ export class Chessboard {
   private mouseDownHandler(e: MouseEvent) {
     //i need pieces
     e.preventDefault();
-    const x = e.offsetX;
-    const y = e.offsetY;
+    const { row: clickedRow, col: clickedCol } = getCellFromMouse({
+      e,
+      tileSize: this.tileSize,
+    });
 
     for (let i = 0; i < this.pieces.length; i++) {
       const piece = this.pieces[i];
-      const leftB = piece.col * this.tileSize;
-      const rightB = (piece.col + 1) * this.tileSize;
-      const topB = piece.row * this.tileSize;
-      const bottomB = (piece.row + 1) * this.tileSize;
-
-      if (x > leftB && x < rightB && y > topB && y < bottomB) {
+      if (piece.row == clickedRow && piece.col == clickedCol) {
         console.log(`Clicked: ${piece.fenPiece}`);
+        this.isDragging = true;
         return;
       }
     }
+  }
+
+  private mouseUpHandler(e: MouseEvent) {
+    if (!this.isDragging) return;
+
+    e.preventDefault();
+
+    const { row, col } = getCellFromMouse({
+      e,
+      tileSize: this.tileSize,
+    });
+
+    //need to calculate which cell it was moved to and center piece to the cell
+    //somehow update the fen accordingly i guess best option is with pieces array
+
+    this.isDragging = false;
+  }
+
+  private mouseOutHandler(e: MouseEvent) {
+    if (!this.isDragging) return;
+
+    e.preventDefault();
+
+    //go back to previous position
+
+    this.isDragging = false;
   }
 }

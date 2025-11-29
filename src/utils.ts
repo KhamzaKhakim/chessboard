@@ -63,3 +63,19 @@ export function iteratePieces(
     }
   }
 }
+
+export function getCellFromMouse({
+  e,
+  tileSize,
+}: {
+  e: MouseEvent;
+  tileSize: number;
+}) {
+  const row = Math.floor(e.offsetY / tileSize);
+  const col = Math.floor(e.offsetX / tileSize);
+
+  // const a = "a".charCodeAt(0);
+  // console.log(String.fromCharCode(a + col) + (-8 + row));
+
+  return { row, col };
+}
