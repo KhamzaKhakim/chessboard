@@ -15,6 +15,7 @@ export class Chessboard {
   pieces: BoardPiece[] = [];
   tileSize: number;
   isDragging = false;
+  isClicked = false;
   currentPiece: BoardPiece | null = null;
 
   constructor(ref: string, size: number = 8, fen: string = startPositon) {
@@ -97,17 +98,37 @@ export class Chessboard {
       tileSize: this.tileSize,
     });
 
-    for (let i = 0; i < this.pieces.length; i++) {
-      const piece = this.pieces[i];
-      if (piece.row == clickedRow && piece.col == clickedCol) {
-        this.isDragging = true;
-        this.currentPiece = piece;
+    if (
+      this.isClicked &&
+      this.currentPiece &&
+      (clickedRow != this.currentPiece.row ||
+        clickedCol != this.currentPiece.col)
+    ) {
+      this.currentPiece.row = clickedRow;
+      this.currentPiece.col = clickedCol;
+      this.currentPiece.y = clickedRow * this.tileSize;
+      this.currentPiece.x = clickedCol * this.tileSize;
 
-        piece.x = e.offsetX - this.tileSize / 2;
-        piece.y = e.offsetY - this.tileSize / 2;
+      this.draw();
+      this.isClicked = false;
 
-        this.draw();
-      }
+      return;
+    }
+
+    const index = this.pieces.findIndex(
+      (piece) => piece.row === clickedRow && piece.col === clickedCol,
+    );
+
+    if (index !== -1) {
+      this.isDragging = true;
+
+      this.currentPiece = this.pieces.splice(index, 1)[0];
+      this.pieces.push(this.currentPiece);
+
+      this.currentPiece.x = e.offsetX - this.tileSize / 2;
+      this.currentPiece.y = e.offsetY - this.tileSize / 2;
+
+      this.draw();
     }
   }
 
@@ -124,6 +145,17 @@ export class Chessboard {
     //need to calculate which cell it was moved to and center piece to the cell
     //somehow update the fen accordingly i guess best option is with pieces array
 
+    if (row == this.currentPiece.row && col == this.currentPiece.col) {
+      this.isClicked = true;
+      this.isDragging = false;
+
+      this.currentPiece.x = this.currentPiece.col * this.tileSize;
+      this.currentPiece.y = this.currentPiece.row * this.tileSize;
+
+      this.draw();
+      return;
+    }
+
     this.currentPiece.row = row;
     this.currentPiece.col = col;
 
@@ -137,7 +169,6 @@ export class Chessboard {
 
   private mouseOutHandler(e: MouseEvent) {
     if (!this.isDragging || !this.currentPiece) return;
-    console.log("Mouse out");
     e.preventDefault();
 
     //go back to previous position
