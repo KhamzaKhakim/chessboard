@@ -1,49 +1,29 @@
-import { FenPiece } from "./types.js";
+import { BoardPiece, FenPiece } from "./types.js";
 import { pieceToSvgName } from "./utils.js";
 
-export function drawPiecesFromFen(
-  fen: string,
+export function drawPieces(
+  pieces: BoardPiece[],
   ctx: CanvasRenderingContext2D,
   tileWidth: number,
   images: Record<FenPiece, HTMLImageElement>,
 ) {
   //TODO: add error checks
 
-  const rows = fen.split("/");
-
   function drawPiece({
-    piece,
-    row,
-    col,
+    fenPiece,
+    x,
+    y,
   }: {
-    piece: FenPiece;
-    row: number;
-    col: number;
+    fenPiece: FenPiece;
+    x: number;
+    y: number;
   }) {
-    ctx.drawImage(
-      images[piece],
-      col * tileWidth,
-      row * tileWidth,
-      tileWidth,
-      tileWidth,
-    );
+    ctx.drawImage(images[fenPiece], x, y, tileWidth, tileWidth);
   }
 
-  for (let i = 0; i < rows.length; i++) {
-    const row = rows[i];
-    let col = 0,
-      idx = 0;
-    while (row[idx]) {
-      if (/\d/.test(row[idx])) {
-        col += Number(row[idx]);
-        idx++;
-        continue;
-      }
-
-      drawPiece({ piece: row[idx] as FenPiece, row: i, col });
-      idx++;
-      col++;
-    }
+  for (let i = 0; i < pieces.length; i++) {
+    const piece = pieces[i];
+    drawPiece({ fenPiece: piece.fenPiece, x: piece.x, y: piece.y });
   }
 }
 

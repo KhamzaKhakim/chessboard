@@ -21,4 +21,6 @@ export type BoardPiece = {
   fenPiece: FenPiece;
   col: number;
   row: number;
+  x: number;
+  y: number;
 };
