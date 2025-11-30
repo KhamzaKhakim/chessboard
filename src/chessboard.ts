@@ -1,9 +1,6 @@
-import { drawPieces, preloadPieces } from "./image.js";
-import { BoardPiece, FEN_PIECES } from "./types.js";
+import { drawMoves, drawPieces, preloadPieces } from "./image.js";
+import { BoardPiece, FEN_PIECES, Move, Position } from "./types.js";
 import { getCellFromMouse, iteratePieces, startPositon } from "./utils.js";
-
-//TODO: rows 0 is the 8th rank hard to read.
-// x and y in drawPiece is counterintuitive
 
 export class Chessboard {
   ref: string;
@@ -17,6 +14,7 @@ export class Chessboard {
   isDragging = false;
   isClicked = false;
   currentPiece: BoardPiece | null = null;
+  availableMoves: Move[] = [];
 
   constructor(ref: string, size: number = 8, fen: string = startPositon) {
     this.ref = ref;
@@ -88,32 +86,18 @@ export class Chessboard {
     }
 
     drawPieces(this.pieces, this.ctx, this.tileSize, this.svgPieces);
+
+    drawMoves(this.availableMoves, this.ctx, this.tileSize);
   }
 
   private mouseDownHandler(e: MouseEvent) {
     //i need pieces
     e.preventDefault();
+
     const { row: clickedRow, col: clickedCol } = getCellFromMouse({
       e,
       tileSize: this.tileSize,
     });
-
-    if (
-      this.isClicked &&
-      this.currentPiece &&
-      (clickedRow != this.currentPiece.row ||
-        clickedCol != this.currentPiece.col)
-    ) {
-      this.currentPiece.row = clickedRow;
-      this.currentPiece.col = clickedCol;
-      this.currentPiece.y = clickedRow * this.tileSize;
-      this.currentPiece.x = clickedCol * this.tileSize;
-
-      this.draw();
-      this.isClicked = false;
-
-      return;
-    }
 
     const index = this.pieces.findIndex(
       (piece) => piece.row === clickedRow && piece.col === clickedCol,
@@ -128,12 +112,19 @@ export class Chessboard {
       this.currentPiece.x = e.offsetX - this.tileSize / 2;
       this.currentPiece.y = e.offsetY - this.tileSize / 2;
 
+      this.availableMoves = this.calculateAvailableMoves(
+        this.currentPiece,
+        this.pieces,
+        this.tileSize,
+        this.size,
+      );
+
       this.draw();
     }
   }
 
   private mouseUpHandler(e: MouseEvent) {
-    if (!this.isDragging || !this.currentPiece) return;
+    if (!(this.isDragging || this.isClicked) || !this.currentPiece) return;
 
     e.preventDefault();
 
@@ -155,7 +146,22 @@ export class Chessboard {
       this.draw();
       return;
     }
+    //move by click, maybe change to mouse up
+    if (this.isClicked && this.currentPiece) {
+      this.currentPiece.row = row;
+      this.currentPiece.col = col;
+      this.currentPiece.y = row * this.tileSize;
+      this.currentPiece.x = col * this.tileSize;
+      this.availableMoves = [];
 
+      this.isClicked = false;
+      this.isDragging = false;
+      this.draw();
+
+      return;
+    }
+
+    //move by drag
     this.currentPiece.row = row;
     this.currentPiece.col = col;
 
@@ -164,6 +170,7 @@ export class Chessboard {
 
     this.isDragging = false;
     this.currentPiece = null;
+    this.availableMoves = [];
     this.draw();
   }
 
@@ -176,14 +183,16 @@ export class Chessboard {
     this.currentPiece.x = this.currentPiece.col * this.tileSize;
     this.currentPiece.y = this.currentPiece.row * this.tileSize;
 
-    this.draw();
-
     this.isDragging = false;
-    this.currentPiece = null;
+    this.isClicked = true;
+    // this.availableMoves = [];
+    // this.currentPiece = null;
+    this.draw();
   }
 
   private mouseMoveHandler(e: MouseEvent) {
     if (!this.isDragging || !this.currentPiece) return;
+
     e.preventDefault();
 
     const x = e.offsetX,
@@ -193,5 +202,56 @@ export class Chessboard {
     this.currentPiece.y = y - this.tileSize / 2;
 
     this.draw();
+  }
+
+  calculateAvailableMoves(
+    currentPiece: BoardPiece,
+    pieces: BoardPiece[],
+    tileSize: number,
+    size: number,
+  ): Move[] {
+    function cleanMoves(v: Position) {
+      if (v.col < 0 || v.col >= size || v.row < 0 || v.row >= size)
+        return false;
+
+      return true;
+    }
+
+    function checkCapture(v: Position): Move {
+      const capture = !!pieces.find((p) => p.col == v.col && p.row == v.row);
+      return { ...v, capture };
+    }
+
+    const { row, col } = currentPiece;
+
+    switch (currentPiece.fenPiece.toLowerCase()) {
+      case "k":
+        return [
+          { row: row + 1, col },
+          { row: row - 1, col },
+          { row, col: col - 1 },
+          { row, col: col + 1 },
+          { row: row + 1, col: col + 1 },
+          { row: row + 1, col: col - 1 },
+          { row: row - 1, col: col - 1 },
+          { row: row - 1, col: col + 1 },
+        ]
+          .filter(cleanMoves)
+          .map(checkCapture);
+      case "n":
+        return [
+          { row: row + 2, col: col + 1 },
+          { row: row + 2, col: col - 1 },
+          { row: row - 2, col: col + 1 },
+          { row: row - 2, col: col - 1 },
+          { row: row + 1, col: col + 2 },
+          { row: row + 1, col: col - 2 },
+          { row: row - 1, col: col + 2 },
+          { row: row - 1, col: col - 2 },
+        ]
+          .filter(cleanMoves)
+          .map(checkCapture);
+    }
+    return [];
   }
 }

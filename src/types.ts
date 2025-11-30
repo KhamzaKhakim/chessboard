@@ -24,3 +24,12 @@ export type BoardPiece = {
   x: number;
   y: number;
 };
+
+export type Position = {
+  row: number;
+  col: number;
+};
+
+export type Move = Position & {
+  capture: boolean;
+};
