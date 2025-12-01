@@ -5,23 +5,41 @@ export function calculateAvailableMoves(
   pieces: BoardPiece[],
   size: number,
 ): Move[] {
-  function cleanMoves(v: Position) {
-    if (v.col < 0 || v.col >= size || v.row < 0 || v.row >= size) return false;
+  function cleanMoves(pos: Position) {
+    if (pos.col < 0 || pos.col >= size || pos.row < 0 || pos.row >= size)
+      return false;
+
+    const ownPiecesAtPosition = pieces.filter(
+      (p) =>
+        p.col == pos.col && p.row == pos.row && currentPiece.color == p.color,
+    );
+
+    if (ownPiecesAtPosition.length) return false;
 
     return true;
   }
 
-  function checkCapture(v: Position): Move {
-    const capture = !!pieces.find((p) => p.col == v.col && p.row == v.row);
-    return { ...v, capture };
+  //TODO: change pieces to map
+  function checkCapture(pos: Position): Move {
+    const capture = !!pieces.find((p) => p.col == pos.col && p.row == pos.row);
+    return { ...pos, capture };
   }
 
-  const { row, col } = currentPiece;
+  // function getRookMoves(pos: Position) {
+  //   let [up, down, left, right] = [true, true, true, true];
 
-  //check color
-  //king and knight is done
-  //bishop rook
-  //queen
+  //   let { col, row } = pos;
+  //   let i = 1;
+  //   while (up || down || left || right) {
+  //     if (up) {
+  //       if (col - i < 0) {
+  //         up = false;
+  //       } else if (col - i == )
+  //     }
+  //   }
+  // }
+
+  const { row, col } = currentPiece;
 
   switch (currentPiece.fenPiece.toLowerCase()) {
     case "k":

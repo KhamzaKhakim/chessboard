@@ -1,6 +1,11 @@
-import { drawMoves, drawPieces, preloadPieces } from "./image.js";
+import {
+  drawCurrentPiece,
+  drawMoves,
+  drawPieces,
+  preloadPieces,
+} from "./image.js";
 import { calculateAvailableMoves } from "./moves.js";
-import { BoardPiece, FEN_PIECES, Move, Color } from "./types.js";
+import { BoardPiece, FEN_PIECES, Move, Color, BoardPieces } from "./types.js";
 import { getCellFromMouse, iteratePieces, startPositon } from "./utils.js";
 
 export class Chessboard {
@@ -10,7 +15,7 @@ export class Chessboard {
   private svgPieces: Record<string, HTMLImageElement> | null = null;
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
-  private pieces: BoardPiece[] = [];
+  private pieces: BoardPieces = new Map<string, BoardPiece>();
   private tileSize: number;
   private isDragging = false;
   private isClicked = false;
@@ -47,10 +52,10 @@ export class Chessboard {
       this.svgPieces = await preloadPieces(FEN_PIECES);
     }
 
-    const tempPieces: BoardPiece[] = [];
+    const tempPieces = new Map<string, BoardPiece>();
 
     iteratePieces(this.fen, ({ fenPiece, row, col }) => {
-      tempPieces.push({
+      tempPieces.set(row + "-" + col, {
         start: row + "-" + col,
         fenPiece,
         row,
@@ -70,6 +75,7 @@ export class Chessboard {
   }
 
   private draw() {
+    if (!this.pieces) return;
     if (!this.svgPieces) {
       throw new Error("Preloaded images not found");
     }
@@ -88,8 +94,17 @@ export class Chessboard {
       }
     }
 
-    drawMoves(this.availableMoves, this.ctx, this.tileSize);
     drawPieces(this.pieces, this.ctx, this.tileSize, this.svgPieces);
+
+    drawMoves(this.availableMoves, this.ctx, this.tileSize);
+
+    if (this.currentPiece)
+      drawCurrentPiece(
+        this.currentPiece,
+        this.ctx,
+        this.tileSize,
+        this.svgPieces,
+      );
   }
 
   private mouseDownHandler(e: MouseEvent) {
@@ -101,22 +116,25 @@ export class Chessboard {
       tileSize: this.tileSize,
     });
 
-    const index = this.pieces.findIndex(
-      (piece) => piece.row === clickedRow && piece.col === clickedCol,
-    );
+    // const index = this.pieces.findIndex(
+    //   (piece) => piece.row === clickedRow && piece.col === clickedCol,
+    // );
 
-    if (index !== -1) {
+    const tempPiece = this.pieces.get(clickedRow + "-" + clickedCol);
+    if (tempPiece) {
       this.isDragging = true;
 
-      this.currentPiece = this.pieces.splice(index, 1)[0];
-      this.pieces.push(this.currentPiece);
+      //TODO: need to move current piece to highest z index layer
+      // decouple from pieces
+      this.currentPiece = tempPiece;
+      this.pieces.delete(clickedRow + "-" + clickedCol);
 
       this.currentPiece.x = e.offsetX - this.tileSize / 2;
       this.currentPiece.y = e.offsetY - this.tileSize / 2;
 
       this.availableMoves = calculateAvailableMoves(
         this.currentPiece,
-        this.pieces,
+        [...this.pieces.values()],
         this.size,
       );
 
@@ -157,6 +175,12 @@ export class Chessboard {
 
       this.isClicked = false;
       this.isDragging = false;
+
+      this.pieces.set(
+        this.currentPiece.row + "-" + this.currentPiece.col,
+        this.currentPiece,
+      );
+      this.currentPiece = null;
       this.draw();
 
       return;
@@ -170,6 +194,11 @@ export class Chessboard {
     this.currentPiece.y = row * this.tileSize;
 
     this.isDragging = false;
+
+    this.pieces.set(
+      this.currentPiece.row + "-" + this.currentPiece.col,
+      this.currentPiece,
+    );
     this.currentPiece = null;
     this.availableMoves = [];
     this.draw();

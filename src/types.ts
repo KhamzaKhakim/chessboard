@@ -28,6 +28,8 @@ export type BoardPiece = {
   y: number;
 };
 
+export type BoardPieces = Map<string, BoardPiece>;
+
 export type Position = {
   row: number;
   col: number;

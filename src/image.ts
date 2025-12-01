@@ -1,8 +1,8 @@
-import { BoardPiece, FenPiece, Move } from "./types.js";
+import { BoardPiece, BoardPieces, FenPiece, Move } from "./types.js";
 import { pieceToSvgName } from "./utils.js";
 
 export function drawPieces(
-  pieces: BoardPiece[],
+  pieces: BoardPieces,
   ctx: CanvasRenderingContext2D,
   tileWidth: number,
   images: Record<FenPiece, HTMLImageElement>,
@@ -21,8 +21,7 @@ export function drawPieces(
     ctx.drawImage(images[fenPiece], x, y, tileWidth, tileWidth);
   }
 
-  for (let i = 0; i < pieces.length; i++) {
-    const piece = pieces[i];
+  for (const piece of pieces.values()) {
     drawPiece({ fenPiece: piece.fenPiece, x: piece.x, y: piece.y });
   }
 }
@@ -83,4 +82,13 @@ export async function preloadPieces(
   );
 
   return Object.fromEntries(entries) as Record<FenPiece, HTMLImageElement>;
+}
+
+export function drawCurrentPiece(
+  piece: BoardPiece,
+  ctx: CanvasRenderingContext2D,
+  tileWidth: number,
+  images: Record<FenPiece, HTMLImageElement>,
+) {
+  ctx.drawImage(images[piece.fenPiece], piece.x, piece.y, tileWidth, tileWidth);
 }
