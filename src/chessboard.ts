@@ -3,18 +3,18 @@ import { BoardPiece, FEN_PIECES, Move, Position } from "./types.js";
 import { getCellFromMouse, iteratePieces, startPositon } from "./utils.js";
 
 export class Chessboard {
-  ref: string;
-  size: number;
-  fen: string;
-  svgPieces: Record<string, HTMLImageElement> | null = null;
-  canvas: HTMLCanvasElement;
-  ctx: CanvasRenderingContext2D;
-  pieces: BoardPiece[] = [];
-  tileSize: number;
-  isDragging = false;
-  isClicked = false;
-  currentPiece: BoardPiece | null = null;
-  availableMoves: Move[] = [];
+  private ref: string;
+  private size: number;
+  private fen: string;
+  private svgPieces: Record<string, HTMLImageElement> | null = null;
+  private canvas: HTMLCanvasElement;
+  private ctx: CanvasRenderingContext2D;
+  private pieces: BoardPiece[] = [];
+  private tileSize: number;
+  private isDragging = false;
+  private isClicked = false;
+  private currentPiece: BoardPiece | null = null;
+  private availableMoves: Move[] = [];
 
   constructor(ref: string, size: number = 8, fen: string = startPositon) {
     this.ref = ref;
@@ -39,7 +39,7 @@ export class Chessboard {
     this.draw();
   }
 
-  async setup() {
+  private async setup() {
     //preload pieces;
     if (!this.svgPieces) {
       this.svgPieces = await preloadPieces(FEN_PIECES);
@@ -66,7 +66,7 @@ export class Chessboard {
     this.canvas.onmousemove = (e) => this.mouseMoveHandler(e);
   }
 
-  draw() {
+  private draw() {
     if (!this.svgPieces) {
       throw new Error("Preloaded images not found");
     }
