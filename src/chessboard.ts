@@ -1,5 +1,6 @@
 import { drawMoves, drawPieces, preloadPieces } from "./image.js";
-import { BoardPiece, FEN_PIECES, Move, Position } from "./types.js";
+import { calculateAvailableMoves } from "./moves.js";
+import { BoardPiece, FEN_PIECES, Move, Color } from "./types.js";
 import { getCellFromMouse, iteratePieces, startPositon } from "./utils.js";
 
 export class Chessboard {
@@ -15,6 +16,7 @@ export class Chessboard {
   private isClicked = false;
   private currentPiece: BoardPiece | null = null;
   private availableMoves: Move[] = [];
+  private currentPlayer: Color = "white";
 
   constructor(ref: string, size: number = 8, fen: string = startPositon) {
     this.ref = ref;
@@ -46,6 +48,7 @@ export class Chessboard {
     }
 
     const tempPieces: BoardPiece[] = [];
+
     iteratePieces(this.fen, ({ fenPiece, row, col }) => {
       tempPieces.push({
         start: row + "-" + col,
@@ -85,9 +88,8 @@ export class Chessboard {
       }
     }
 
-    drawPieces(this.pieces, this.ctx, this.tileSize, this.svgPieces);
-
     drawMoves(this.availableMoves, this.ctx, this.tileSize);
+    drawPieces(this.pieces, this.ctx, this.tileSize, this.svgPieces);
   }
 
   private mouseDownHandler(e: MouseEvent) {
@@ -112,10 +114,9 @@ export class Chessboard {
       this.currentPiece.x = e.offsetX - this.tileSize / 2;
       this.currentPiece.y = e.offsetY - this.tileSize / 2;
 
-      this.availableMoves = this.calculateAvailableMoves(
+      this.availableMoves = calculateAvailableMoves(
         this.currentPiece,
         this.pieces,
-        this.tileSize,
         this.size,
       );
 
@@ -202,56 +203,5 @@ export class Chessboard {
     this.currentPiece.y = y - this.tileSize / 2;
 
     this.draw();
-  }
-
-  calculateAvailableMoves(
-    currentPiece: BoardPiece,
-    pieces: BoardPiece[],
-    tileSize: number,
-    size: number,
-  ): Move[] {
-    function cleanMoves(v: Position) {
-      if (v.col < 0 || v.col >= size || v.row < 0 || v.row >= size)
-        return false;
-
-      return true;
-    }
-
-    function checkCapture(v: Position): Move {
-      const capture = !!pieces.find((p) => p.col == v.col && p.row == v.row);
-      return { ...v, capture };
-    }
-
-    const { row, col } = currentPiece;
-
-    switch (currentPiece.fenPiece.toLowerCase()) {
-      case "k":
-        return [
-          { row: row + 1, col },
-          { row: row - 1, col },
-          { row, col: col - 1 },
-          { row, col: col + 1 },
-          { row: row + 1, col: col + 1 },
-          { row: row + 1, col: col - 1 },
-          { row: row - 1, col: col - 1 },
-          { row: row - 1, col: col + 1 },
-        ]
-          .filter(cleanMoves)
-          .map(checkCapture);
-      case "n":
-        return [
-          { row: row + 2, col: col + 1 },
-          { row: row + 2, col: col - 1 },
-          { row: row - 2, col: col + 1 },
-          { row: row - 2, col: col - 1 },
-          { row: row + 1, col: col + 2 },
-          { row: row + 1, col: col - 2 },
-          { row: row - 1, col: col + 2 },
-          { row: row - 1, col: col - 2 },
-        ]
-          .filter(cleanMoves)
-          .map(checkCapture);
-    }
-    return [];
   }
 }

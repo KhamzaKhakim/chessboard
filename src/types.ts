@@ -14,11 +14,14 @@ export const FEN_PIECES = [
   "P", //white pawn
 ] as const;
 
+export type Color = "white" | "black";
+
 export type FenPiece = (typeof FEN_PIECES)[number];
 
 export type BoardPiece = {
   start: string;
   fenPiece: FenPiece;
+  color: Color;
   col: number;
   row: number;
   x: number;

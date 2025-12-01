@@ -1,4 +1,6 @@
-import { FenPiece, FEN_PIECES } from "./types.js";
+import { FenPiece, FEN_PIECES, Color } from "./types.js";
+
+export const startPositon = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
 export const pieceToName: Record<(typeof FEN_PIECES)[number], string> = {
   k: "black king",
@@ -29,8 +31,6 @@ export const pieceToSvgName: Record<(typeof FEN_PIECES)[number], string> = {
   B: "wb",
   P: "wp",
 };
-
-export const startPositon = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
 export function iteratePieces(
   fen: string,
@@ -74,8 +74,9 @@ export function getCellFromMouse({
   const row = Math.floor(e.offsetY / tileSize);
   const col = Math.floor(e.offsetX / tileSize);
 
-  // const a = "a".charCodeAt(0);
-  // console.log(String.fromCharCode(a + col) + (-8 + row));
-
   return { row, col };
+}
+
+export function getColorFromFenPie(piece: FenPiece): Color {
+  return piece == piece.toUpperCase() ? "white" : "black";
 }
