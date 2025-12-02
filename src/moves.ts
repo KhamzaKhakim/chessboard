@@ -1,27 +1,25 @@
-import { BoardPiece, Move, Position } from "./types.js";
+import { BoardPiece, BoardPieces, Move, Position } from "./types.js";
 
 export function calculateAvailableMoves(
   currentPiece: BoardPiece,
-  pieces: BoardPiece[],
+  pieces: BoardPieces,
   size: number,
 ): Move[] {
   function cleanMoves(pos: Position) {
     if (pos.col < 0 || pos.col >= size || pos.row < 0 || pos.row >= size)
       return false;
 
-    const ownPiecesAtPosition = pieces.filter(
-      (p) =>
-        p.col == pos.col && p.row == pos.row && currentPiece.color == p.color,
-    );
-
-    if (ownPiecesAtPosition.length) return false;
+    const pieceAtPosition = pieces.get(`${pos.row}-${pos.col}`);
+    if (pieceAtPosition && pieceAtPosition.color == currentPiece.color) {
+      return false;
+    }
 
     return true;
   }
 
   //TODO: change pieces to map
   function checkCapture(pos: Position): Move {
-    const capture = !!pieces.find((p) => p.col == pos.col && p.row == pos.row);
+    const capture = pieces.has(`${pos.row}-${pos.col}`);
     return { ...pos, capture };
   }
 

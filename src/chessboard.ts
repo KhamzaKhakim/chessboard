@@ -5,8 +5,13 @@ import {
   preloadPieces,
 } from "./image.js";
 import { calculateAvailableMoves } from "./moves.js";
-import { BoardPiece, FEN_PIECES, Move, Color, BoardPieces } from "./types.js";
-import { getCellFromMouse, iteratePieces, startPositon } from "./utils.js";
+import { BoardPiece, FEN_PIECES, Move, BoardPieces } from "./types.js";
+import {
+  getCellFromMouse,
+  getColorFromFenPie,
+  iteratePieces,
+  startPositon,
+} from "./utils.js";
 
 export class Chessboard {
   private ref: string;
@@ -21,7 +26,6 @@ export class Chessboard {
   private isClicked = false;
   private currentPiece: BoardPiece | null = null;
   private availableMoves: Move[] = [];
-  private currentPlayer: Color = "white";
 
   constructor(ref: string, size: number = 8, fen: string = startPositon) {
     this.ref = ref;
@@ -62,6 +66,7 @@ export class Chessboard {
         col,
         y: row * this.tileSize,
         x: col * this.tileSize,
+        color: getColorFromFenPie(fenPiece),
       } as BoardPiece);
     });
 
@@ -108,33 +113,27 @@ export class Chessboard {
   }
 
   private mouseDownHandler(e: MouseEvent) {
-    //i need pieces
     e.preventDefault();
 
-    const { row: clickedRow, col: clickedCol } = getCellFromMouse({
+    const { row, col } = getCellFromMouse({
       e,
       tileSize: this.tileSize,
     });
 
-    // const index = this.pieces.findIndex(
-    //   (piece) => piece.row === clickedRow && piece.col === clickedCol,
-    // );
+    const tempPiece = this.pieces.get(row + "-" + col);
 
-    const tempPiece = this.pieces.get(clickedRow + "-" + clickedCol);
     if (tempPiece) {
       this.isDragging = true;
 
-      //TODO: need to move current piece to highest z index layer
-      // decouple from pieces
       this.currentPiece = tempPiece;
-      this.pieces.delete(clickedRow + "-" + clickedCol);
+      this.pieces.delete(row + "-" + col);
 
       this.currentPiece.x = e.offsetX - this.tileSize / 2;
       this.currentPiece.y = e.offsetY - this.tileSize / 2;
 
       this.availableMoves = calculateAvailableMoves(
         this.currentPiece,
-        [...this.pieces.values()],
+        this.pieces,
         this.size,
       );
 
@@ -152,9 +151,6 @@ export class Chessboard {
       tileSize: this.tileSize,
     });
 
-    //need to calculate which cell it was moved to and center piece to the cell
-    //somehow update the fen accordingly i guess best option is with pieces array
-
     if (row == this.currentPiece.row && col == this.currentPiece.col) {
       this.isClicked = true;
       this.isDragging = false;
@@ -165,22 +161,24 @@ export class Chessboard {
       this.draw();
       return;
     }
-    //move by click, maybe change to mouse up
-    if (this.isClicked && this.currentPiece) {
+
+    if (this.isClicked) {
+      //need to have different animation
       this.currentPiece.row = row;
       this.currentPiece.col = col;
-      this.currentPiece.y = row * this.tileSize;
-      this.currentPiece.x = col * this.tileSize;
-      this.availableMoves = [];
 
-      this.isClicked = false;
+      this.currentPiece.x = col * this.tileSize;
+      this.currentPiece.y = row * this.tileSize;
+
       this.isDragging = false;
+      this.isClicked = false;
 
       this.pieces.set(
         this.currentPiece.row + "-" + this.currentPiece.col,
         this.currentPiece,
       );
       this.currentPiece = null;
+      this.availableMoves = [];
       this.draw();
 
       return;
@@ -194,6 +192,7 @@ export class Chessboard {
     this.currentPiece.y = row * this.tileSize;
 
     this.isDragging = false;
+    this.isClicked = false;
 
     this.pieces.set(
       this.currentPiece.row + "-" + this.currentPiece.col,
