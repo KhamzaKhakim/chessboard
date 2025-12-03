@@ -12,7 +12,6 @@ import {
   iteratePieces,
   startPositon,
 } from "./utils.js";
-
 export class Chessboard {
   private ref: string;
   private size: number;
@@ -233,8 +232,8 @@ export class Chessboard {
 
     this.isDragging = false;
     this.isClicked = true;
-    // this.availableMoves = [];
-    // this.currentPiece = null;
+    this.availableMoves = [];
+    this.currentPiece = null;
     this.draw();
   }
 

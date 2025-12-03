@@ -16,7 +16,7 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsc -w && node dist/index.js" 
+		"dev": "tsc -w && node dist/index.js"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.39.1",
