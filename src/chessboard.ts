@@ -120,6 +120,24 @@ export class Chessboard {
       tileSize: this.tileSize,
     });
 
+    if (this.isClicked) {
+      const isClickAvailable = !!this.availableMoves.find(
+        (m) => m.row == row && col == m.col,
+      );
+
+      if (!isClickAvailable) {
+        this.pieces.set(
+          `${this.currentPiece?.row}-${this.currentPiece?.col}`,
+          this.currentPiece!,
+        );
+        this.currentPiece = null;
+        this.isClicked = false;
+        this.availableMoves = [];
+      } else {
+        this.pieces.delete(row + "-" + col);
+      }
+    }
+
     const tempPiece = this.pieces.get(row + "-" + col);
 
     if (tempPiece) {
@@ -151,6 +169,7 @@ export class Chessboard {
       tileSize: this.tileSize,
     });
 
+    //set is clicked true
     if (row == this.currentPiece.row && col == this.currentPiece.col) {
       this.isClicked = true;
       this.isDragging = false;
