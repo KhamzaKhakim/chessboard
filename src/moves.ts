@@ -23,19 +23,73 @@ export function calculateAvailableMoves(
     return { ...pos, capture };
   }
 
-  // function getRookMoves(pos: Position) {
-  //   let [up, down, left, right] = [true, true, true, true];
+  //TODO: make more readable
+  function getRookMoves(pos: Position) {
+    let [up, down, left, right] = [true, true, true, true];
+    const moves: Position[] = [];
 
-  //   let { col, row } = pos;
-  //   let i = 1;
-  //   while (up || down || left || right) {
-  //     if (up) {
-  //       if (col - i < 0) {
-  //         up = false;
-  //       } else if (col - i == )
-  //     }
-  //   }
-  // }
+    const { col, row } = pos;
+    let i = 1;
+    while (up || down || left || right) {
+      if (i > size) return [];
+
+      //check if left is still ok
+      if (left) {
+        //out of board
+        if (col - i < 0) {
+          left = false;
+        } else if (pieces.has(row + "-" + (col - i))) {
+          //if not same color can capture
+          if (pieces.get(row + "-" + (col - i))?.color != currentPiece.color) {
+            moves.push({ row, col: col - i });
+          }
+          left = false;
+        } else {
+          moves.push({ row, col: col - i });
+        }
+      }
+      if (right) {
+        if (col + i > size) {
+          right = false;
+        } else if (pieces.has(row + "-" + (col + i))) {
+          if (pieces.get(row + "-" + (col + i))?.color != currentPiece.color) {
+            moves.push({ row, col: col + i });
+          }
+          right = false;
+        } else {
+          moves.push({ row, col: col + i });
+        }
+      }
+      if (up) {
+        if (row - i < 0) {
+          up = false;
+        } else if (pieces.has(row - i + "-" + col)) {
+          if (pieces.get(row - i + "-" + col)?.color != currentPiece.color) {
+            moves.push({ row: row - i, col });
+          }
+          up = false;
+        } else {
+          moves.push({ row: row - i, col });
+        }
+      }
+      if (down) {
+        if (row + i > size) {
+          down = false;
+        } else if (pieces.has(row + i + "-" + col)) {
+          if (pieces.get(row + i + "-" + col)?.color != currentPiece.color) {
+            moves.push({ row: row + i, col });
+          }
+          down = false;
+        } else {
+          moves.push({ row: row + i, col });
+        }
+      }
+      i++;
+    }
+
+    console.log(moves);
+    return moves;
+  }
 
   const { row, col } = currentPiece;
 
@@ -67,7 +121,7 @@ export function calculateAvailableMoves(
         .filter(cleanMoves)
         .map(checkCapture);
     case "r":
-      return [].map(checkCapture);
+      return getRookMoves(currentPiece).map(checkCapture);
   }
   return [];
 }
