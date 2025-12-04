@@ -132,6 +132,7 @@ export class Chessboard {
         this.currentPiece = null;
         this.isClicked = false;
         this.availableMoves = [];
+        this.draw();
       } else {
         this.pieces.delete(row + "-" + col);
       }

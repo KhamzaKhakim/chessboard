@@ -87,7 +87,6 @@ export function calculateAvailableMoves(
       i++;
     }
 
-    console.log(moves);
     return moves;
   }
 
