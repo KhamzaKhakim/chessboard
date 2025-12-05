@@ -90,6 +90,80 @@ export function calculateAvailableMoves(
     return moves;
   }
 
+  function getBishopMoves(pos: Position) {
+    //tl is top left, br is bottom right
+    let [tl, tr, bl, br] = [true, true, true, true];
+    const moves: Position[] = [];
+
+    const { col, row } = pos;
+    let i = 1;
+    while (tl || tr || bl || br) {
+      if (i > size) return [];
+
+      if (tl) {
+        //out of board
+        if (col - i < 0 || row - i < 0) {
+          tl = false;
+        } else if (pieces.has(row - i + "-" + (col - i))) {
+          //if not same color can capture
+          if (
+            pieces.get(row - i + "-" + (col - i))?.color != currentPiece.color
+          ) {
+            moves.push({ row: row - i, col: col - i });
+          }
+          tl = false;
+        } else {
+          moves.push({ row: row - i, col: col - i });
+        }
+      }
+      if (tr) {
+        if (col + i > size || row - i < 0) {
+          tr = false;
+        } else if (pieces.has(row - i + "-" + (col + i))) {
+          if (
+            pieces.get(row - i + "-" + (col + i))?.color != currentPiece.color
+          ) {
+            moves.push({ row: row - i, col: col + i });
+          }
+          tr = false;
+        } else {
+          moves.push({ row: row - i, col: col + i });
+        }
+      }
+      if (bl) {
+        if (row + i > size || col - i < 0) {
+          bl = false;
+        } else if (pieces.has(row + i + "-" + (col - i))) {
+          if (
+            pieces.get(row + i + "-" + (col - i))?.color != currentPiece.color
+          ) {
+            moves.push({ row: row + i, col: col - i });
+          }
+          bl = false;
+        } else {
+          moves.push({ row: row + i, col: col - i });
+        }
+      }
+      if (br) {
+        if (row + i > size || col + i > size) {
+          br = false;
+        } else if (pieces.has(row + i + "-" + (col + i))) {
+          if (
+            pieces.get(row + i + "-" + (col + i))?.color != currentPiece.color
+          ) {
+            moves.push({ row: row + i, col: col + i });
+          }
+          br = false;
+        } else {
+          moves.push({ row: row + i, col: col + i });
+        }
+      }
+      i++;
+    }
+
+    return moves;
+  }
+
   const { row, col } = currentPiece;
 
   switch (currentPiece.fenPiece.toLowerCase()) {
@@ -121,6 +195,8 @@ export function calculateAvailableMoves(
         .map(checkCapture);
     case "r":
       return getRookMoves(currentPiece).map(checkCapture);
+    case "b":
+      return getBishopMoves(currentPiece).map(checkCapture);
   }
   return [];
 }
