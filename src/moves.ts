@@ -297,6 +297,56 @@ export function calculateAvailableMoves(
     return moves;
   }
 
+  function getPawnMoves(pos: Position) {
+    const moves: Position[] = [];
+    //TODO: add en passant
+    if (currentPiece.color == "white") {
+      if (!pieces.has(`${pos.row - 1}-${pos.col}`)) {
+        console.log(pieces);
+        console.log(`${pos.row - 1} + ${pos.col}`);
+        moves.push({ row: pos.row - 1, col: pos.col });
+      }
+      if (
+        pos.row == size - 2 &&
+        !pieces.has(`${pos.row - 1}-${pos.col}`) &&
+        !pieces.has(`${pos.row - 2}-${pos.col}`)
+      ) {
+        moves.push({ row: pos.row - 2, col: pos.col });
+      }
+      const tl = pieces.get(`${pos.row - 1}-${pos.col - 1}`);
+      const tr = pieces.get(`${pos.row - 1}-${pos.col + 1}`);
+      if (tl && tl.color != currentPiece.color) {
+        moves.push({ row: pos.row - 1, col: pos.col - 1 });
+      }
+      if (tr && tr.color != currentPiece.color) {
+        moves.push({ row: pos.row - 1, col: pos.col + 1 });
+      }
+    } else {
+      if (!pieces.has(`${pos.row + 1}-${pos.col}`)) {
+        console.log(pieces);
+        console.log(`${pos.row + 1} + ${pos.col}`);
+        moves.push({ row: pos.row + 1, col: pos.col });
+      }
+      if (
+        pos.row == 1 &&
+        !pieces.has(`${pos.row + 1}-${pos.col}`) &&
+        !pieces.has(`${pos.row + 2}-${pos.col}`)
+      ) {
+        moves.push({ row: pos.row + 2, col: pos.col });
+      }
+      const tl = pieces.get(`${pos.row + 1}-${pos.col - 1}`);
+      const tr = pieces.get(`${pos.row + 1}-${pos.col + 1}`);
+      if (tl && tl.color != currentPiece.color) {
+        moves.push({ row: pos.row + 1, col: pos.col - 1 });
+      }
+      if (tr && tr.color != currentPiece.color) {
+        moves.push({ row: pos.row + 1, col: pos.col + 1 });
+      }
+    }
+
+    return moves;
+  }
+
   const { row, col } = currentPiece;
 
   switch (currentPiece.fenPiece.toLowerCase()) {
@@ -334,6 +384,11 @@ export function calculateAvailableMoves(
       return getBishopMoves(currentPiece).map(checkCapture);
     case "q":
       return getQueenMoves(currentPiece).map(checkCapture);
+    case "p":
+      return getPawnMoves(currentPiece).map(checkCapture);
+    default:
+      throw new Error(
+        `Piece with fen code: ${currentPiece.fenPiece} not found`,
+      );
   }
-  return [];
 }
