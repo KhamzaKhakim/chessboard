@@ -10,6 +10,7 @@ import {
   getCellFromMouse,
   getColorFromFenPie,
   iteratePieces,
+  posKey,
   startPositon,
 } from "./utils.js";
 export class Chessboard {
@@ -58,8 +59,8 @@ export class Chessboard {
     const tempPieces = new Map<string, BoardPiece>();
 
     iteratePieces(this.fen, ({ fenPiece, row, col }) => {
-      tempPieces.set(row + "-" + col, {
-        start: row + "-" + col,
+      tempPieces.set(posKey(row, col), {
+        start: posKey(row, col),
         fenPiece,
         row,
         col,
@@ -119,14 +120,14 @@ export class Chessboard {
       tileSize: this.tileSize,
     });
 
-    if (this.isClicked) {
+    if (this.isClicked && this.currentPiece) {
       const isClickAvailable = !!this.availableMoves.find(
         (m) => m.row == row && col == m.col,
       );
 
       if (!isClickAvailable) {
         this.pieces.set(
-          `${this.currentPiece?.row}-${this.currentPiece?.col}`,
+          posKey(this.currentPiece.row, this.currentPiece?.col),
           this.currentPiece!,
         );
         this.currentPiece = null;
@@ -134,17 +135,17 @@ export class Chessboard {
         this.availableMoves = [];
         this.draw();
       } else {
-        this.pieces.delete(row + "-" + col);
+        this.pieces.delete(posKey(row, col));
       }
     }
 
-    const tempPiece = this.pieces.get(row + "-" + col);
+    const tempPiece = this.pieces.get(posKey(row, col));
 
     if (tempPiece) {
       this.isDragging = true;
 
       this.currentPiece = tempPiece;
-      this.pieces.delete(row + "-" + col);
+      this.pieces.delete(posKey(row, col));
 
       this.currentPiece.x = e.offsetX - this.tileSize / 2;
       this.currentPiece.y = e.offsetY - this.tileSize / 2;
@@ -193,7 +194,7 @@ export class Chessboard {
       this.isClicked = false;
 
       this.pieces.set(
-        this.currentPiece.row + "-" + this.currentPiece.col,
+        posKey(this.currentPiece.row, this.currentPiece.col),
         this.currentPiece,
       );
       this.currentPiece = null;
@@ -214,7 +215,7 @@ export class Chessboard {
     this.isClicked = false;
 
     this.pieces.set(
-      this.currentPiece.row + "-" + this.currentPiece.col,
+      posKey(this.currentPiece.row, this.currentPiece.col),
       this.currentPiece,
     );
     this.currentPiece = null;

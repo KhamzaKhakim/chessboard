@@ -80,3 +80,5 @@ export function getCellFromMouse({
 export function getColorFromFenPie(piece: FenPiece): Color {
   return piece == piece.toUpperCase() ? "white" : "black";
 }
+
+export const posKey = (row: number, col: number) => `${row}-${col}`;
