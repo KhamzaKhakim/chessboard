@@ -120,23 +120,8 @@ export class Chessboard {
       tileSize: this.tileSize,
     });
 
-    if (this.isClicked && this.currentPiece) {
-      const isClickAvailable = !!this.availableMoves.find(
-        (m) => m.row == row && col == m.col,
-      );
-
-      if (!isClickAvailable) {
-        this.pieces.set(
-          posKey(this.currentPiece.row, this.currentPiece?.col),
-          this.currentPiece!,
-        );
-        this.currentPiece = null;
-        this.isClicked = false;
-        this.availableMoves = [];
-        this.draw();
-      } else {
-        this.pieces.delete(posKey(row, col));
-      }
+    if (this.isClicked) {
+      return;
     }
 
     const tempPiece = this.pieces.get(posKey(row, col));
@@ -170,7 +155,6 @@ export class Chessboard {
       tileSize: this.tileSize,
     });
 
-    //set is clicked true
     if (row == this.currentPiece.row && col == this.currentPiece.col) {
       this.isClicked = true;
       this.isDragging = false;
@@ -183,6 +167,24 @@ export class Chessboard {
     }
 
     if (this.isClicked) {
+      const isClickAvailable = !!this.availableMoves.find(
+        (m) => m.row == row && col == m.col,
+      );
+
+      if (!isClickAvailable) {
+        this.pieces.set(
+          posKey(this.currentPiece.row, this.currentPiece?.col),
+          this.currentPiece!,
+        );
+        this.currentPiece = null;
+        this.isClicked = false;
+        this.availableMoves = [];
+        this.draw();
+        return;
+      } else {
+        this.pieces.delete(posKey(row, col));
+      }
+
       //need to have different animation
       this.currentPiece.row = row;
       this.currentPiece.col = col;
