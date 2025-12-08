@@ -22,8 +22,8 @@ export class Chessboard {
   private ctx: CanvasRenderingContext2D;
   private pieces: BoardPieces = new Map<string, BoardPiece>();
   private tileSize: number;
-  private isDragging = false;
-  private isClicked = false;
+  private pieceChosen = false;
+  private mousePressed = false;
   private currentPiece: BoardPiece | null = null;
   private availableMoves: Move[] = [];
 
@@ -120,35 +120,55 @@ export class Chessboard {
       tileSize: this.tileSize,
     });
 
-    if (this.isClicked) {
+    if (row == this.currentPiece?.row && col == this.currentPiece.col) {
+      this.pieceChosen = true;
+      this.mousePressed = true;
       return;
     }
 
     const tempPiece = this.pieces.get(posKey(row, col));
 
     if (tempPiece) {
-      this.isDragging = true;
+      if (!this.currentPiece) {
+        this.currentPiece = tempPiece;
+        this.pieces.delete(posKey(row, col));
 
-      this.currentPiece = tempPiece;
-      this.pieces.delete(posKey(row, col));
+        this.currentPiece.x = e.offsetX - this.tileSize / 2;
+        this.currentPiece.y = e.offsetY - this.tileSize / 2;
 
-      this.currentPiece.x = e.offsetX - this.tileSize / 2;
-      this.currentPiece.y = e.offsetY - this.tileSize / 2;
+        this.availableMoves = calculateAvailableMoves(
+          this.currentPiece,
+          this.pieces,
+          this.size,
+        );
 
-      this.availableMoves = calculateAvailableMoves(
-        this.currentPiece,
-        this.pieces,
-        this.size,
-      );
+        this.draw();
+      } else if (this.currentPiece.color == tempPiece.color) {
+        this.pieces.set(posKey(this.currentPiece), this.currentPiece);
+        this.currentPiece = tempPiece;
+        this.pieces.delete(posKey(row, col));
 
-      this.draw();
+        this.currentPiece.x = e.offsetX - this.tileSize / 2;
+        this.currentPiece.y = e.offsetY - this.tileSize / 2;
+
+        this.availableMoves = calculateAvailableMoves(
+          this.currentPiece,
+          this.pieces,
+          this.size,
+        );
+
+        this.draw();
+      }
+      this.mousePressed = true;
+      return;
     }
   }
 
   private mouseUpHandler(e: MouseEvent) {
-    if (!(this.isDragging || this.isClicked) || !this.currentPiece) return;
+    if (!this.currentPiece) return;
 
     e.preventDefault();
+    this.mousePressed = false;
 
     const { row, col } = getCellFromMouse({
       e,
@@ -156,93 +176,71 @@ export class Chessboard {
     });
 
     if (row == this.currentPiece.row && col == this.currentPiece.col) {
-      this.isClicked = true;
-      this.isDragging = false;
-
       this.currentPiece.x = this.currentPiece.col * this.tileSize;
       this.currentPiece.y = this.currentPiece.row * this.tileSize;
 
-      this.draw();
-      return;
-    }
+      if (this.pieceChosen) {
+        this.pieces.set(posKey(this.currentPiece), this.currentPiece);
 
-    if (this.isClicked) {
-      const isClickAvailable = !!this.availableMoves.find(
+        this.currentPiece = null;
+        this.availableMoves = [];
+        this.pieceChosen = false;
+        this.draw();
+        return;
+      }
+
+      this.pieceChosen = true;
+    } else {
+      //TODO: improve moveAvailabe finding
+      const isMoveAvailable = !!this.availableMoves.find(
         (m) => m.row == row && col == m.col,
       );
 
-      if (!isClickAvailable) {
-        this.pieces.set(
-          posKey(this.currentPiece.row, this.currentPiece?.col),
-          this.currentPiece!,
-        );
-        this.currentPiece = null;
-        this.isClicked = false;
-        this.availableMoves = [];
-        this.draw();
-        return;
+      if (!isMoveAvailable) {
+        this.currentPiece.x = this.currentPiece.col * this.tileSize;
+        this.currentPiece.y = this.currentPiece.row * this.tileSize;
+
+        if (this.pieceChosen) {
+          this.pieces.set(posKey(this.currentPiece), this.currentPiece);
+          this.currentPiece = null;
+          this.availableMoves = [];
+        }
+
+        this.pieceChosen = false;
       } else {
-        this.pieces.delete(posKey(row, col));
+        this.currentPiece.row = row;
+        this.currentPiece.col = col;
+
+        this.currentPiece.x = col * this.tileSize;
+        this.currentPiece.y = row * this.tileSize;
+
+        this.pieces.set(posKey(this.currentPiece), this.currentPiece);
+        this.currentPiece = null;
+        this.availableMoves = [];
+        this.pieceChosen = false;
       }
-
-      //need to have different animation
-      this.currentPiece.row = row;
-      this.currentPiece.col = col;
-
-      this.currentPiece.x = col * this.tileSize;
-      this.currentPiece.y = row * this.tileSize;
-
-      this.isDragging = false;
-      this.isClicked = false;
-
-      this.pieces.set(
-        posKey(this.currentPiece.row, this.currentPiece.col),
-        this.currentPiece,
-      );
-      this.currentPiece = null;
-      this.availableMoves = [];
-      this.draw();
-
-      return;
     }
-
-    //move by drag
-    this.currentPiece.row = row;
-    this.currentPiece.col = col;
-
-    this.currentPiece.x = col * this.tileSize;
-    this.currentPiece.y = row * this.tileSize;
-
-    this.isDragging = false;
-    this.isClicked = false;
-
-    this.pieces.set(
-      posKey(this.currentPiece.row, this.currentPiece.col),
-      this.currentPiece,
-    );
-    this.currentPiece = null;
-    this.availableMoves = [];
     this.draw();
+    return;
   }
 
   private mouseOutHandler(e: MouseEvent) {
-    if (!this.isDragging || !this.currentPiece) return;
+    if (!this.currentPiece) return;
     e.preventDefault();
 
     //go back to previous position
     //TODO: remove maybe
     this.currentPiece.x = this.currentPiece.col * this.tileSize;
     this.currentPiece.y = this.currentPiece.row * this.tileSize;
+    this.mousePressed = false;
 
-    this.isDragging = false;
-    this.isClicked = true;
-    this.availableMoves = [];
-    this.currentPiece = null;
+    // this.availableMoves = [];
+    // this.currentPiece = null;
     this.draw();
   }
 
   private mouseMoveHandler(e: MouseEvent) {
-    if (!this.isDragging || !this.currentPiece) return;
+    if (!this.mousePressed || !this.currentPiece) return;
 
     e.preventDefault();
 

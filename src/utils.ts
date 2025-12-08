@@ -1,4 +1,4 @@
-import { FenPiece, FEN_PIECES, Color } from "./types.js";
+import { FenPiece, FEN_PIECES, Color, BoardPiece } from "./types.js";
 
 export const startPositon = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
@@ -81,4 +81,9 @@ export function getColorFromFenPie(piece: FenPiece): Color {
   return piece == piece.toUpperCase() ? "white" : "black";
 }
 
-export const posKey = (row: number, col: number) => `${row}-${col}`;
+export function posKey(piece: BoardPiece): string;
+export function posKey(row: number, col: number): string;
+export function posKey(pieceOrRow: BoardPiece | number, col?: number): string {
+  if (typeof pieceOrRow == "number") return `${pieceOrRow}-${col}`;
+  else return `${pieceOrRow.row}-${pieceOrRow.col}`;
+}
