@@ -104,12 +104,42 @@ export class Chessboard {
     drawMoves(this.availableMoves, this.ctx, this.tileSize);
 
     if (this.currentPiece)
-      drawCurrentPiece(
-        this.currentPiece,
-        this.ctx,
-        this.tileSize,
-        this.svgPieces,
-      );
+      if (this.currentPiece.dx || this.currentPiece.dy) {
+        this.currentPiece.x += this.currentPiece.dx || 0;
+        this.currentPiece.y += this.currentPiece.dy || 0;
+
+        //TODO: wip
+        // if (
+        //   this.currentPiece.dx > 0 &&
+        //   this.currentPiece.col * this.tileSize == this.currentPiece.x
+        // ) {
+        // }
+
+        // if (
+        //   this.currentPiece.row * this.tileSize == this.currentPiece.y &&
+        //   this.currentPiece.col * this.tileSize == this.currentPiece.x
+        // ) {
+        //   this.currentPiece.dx = undefined;
+        //   this.currentPiece.dy = undefined;
+        // }
+        drawCurrentPiece(
+          this.currentPiece,
+          this.ctx,
+          this.tileSize,
+          this.svgPieces,
+        );
+
+        console.log(this.currentPiece.y, this.currentPiece.row * this.tileSize);
+
+        this.draw();
+      } else {
+        drawCurrentPiece(
+          this.currentPiece,
+          this.ctx,
+          this.tileSize,
+          this.svgPieces,
+        );
+      }
   }
 
   private mouseDownHandler(e: MouseEvent) {
@@ -120,6 +150,7 @@ export class Chessboard {
       tileSize: this.tileSize,
     });
 
+    // pressed same piece again
     if (row == this.currentPiece?.row && col == this.currentPiece.col) {
       this.pieceChosen = true;
       this.mousePressed = true;
@@ -129,6 +160,7 @@ export class Chessboard {
     const tempPiece = this.pieces.get(posKey(row, col));
 
     if (tempPiece) {
+      // no selected piece
       if (!this.currentPiece) {
         this.currentPiece = tempPiece;
         this.pieces.delete(posKey(row, col));
@@ -144,6 +176,7 @@ export class Chessboard {
 
         this.draw();
       } else if (this.currentPiece.color == tempPiece.color) {
+        // piece with the same color
         this.pieces.set(posKey(this.currentPiece), this.currentPiece);
         this.currentPiece = tempPiece;
         this.pieces.delete(posKey(row, col));
@@ -168,7 +201,7 @@ export class Chessboard {
     if (!this.currentPiece) return;
 
     e.preventDefault();
-    this.mousePressed = false;
+    // this.mousePressed = false; //move below
 
     const { row, col } = getCellFromMouse({
       e,
@@ -176,6 +209,7 @@ export class Chessboard {
     });
 
     if (row == this.currentPiece.row && col == this.currentPiece.col) {
+      this.mousePressed = false;
       this.currentPiece.x = this.currentPiece.col * this.tileSize;
       this.currentPiece.y = this.currentPiece.row * this.tileSize;
 
@@ -197,30 +231,37 @@ export class Chessboard {
       );
 
       if (!isMoveAvailable) {
+        console.log(this.mousePressed);
         this.currentPiece.x = this.currentPiece.col * this.tileSize;
         this.currentPiece.y = this.currentPiece.row * this.tileSize;
 
-        if (this.pieceChosen) {
+        if (!this.mousePressed) {
           this.pieces.set(posKey(this.currentPiece), this.currentPiece);
           this.currentPiece = null;
           this.availableMoves = [];
         }
-
-        this.pieceChosen = false;
       } else {
+        //TODO: if mouse not pressed animate
         this.currentPiece.row = row;
         this.currentPiece.col = col;
+        if (!this.mousePressed) {
+          this.currentPiece.dx =
+            (col * this.tileSize - this.currentPiece.x) / 100;
+          this.currentPiece.dy =
+            (row * this.tileSize - this.currentPiece.y) / 100;
+        } else {
+          this.currentPiece.x = col * this.tileSize;
+          this.currentPiece.y = row * this.tileSize;
 
-        this.currentPiece.x = col * this.tileSize;
-        this.currentPiece.y = row * this.tileSize;
-
-        this.pieces.set(posKey(this.currentPiece), this.currentPiece);
-        this.currentPiece = null;
-        this.availableMoves = [];
-        this.pieceChosen = false;
+          this.pieces.set(posKey(this.currentPiece), this.currentPiece);
+          this.currentPiece = null;
+          this.availableMoves = [];
+          this.pieceChosen = false;
+        }
       }
     }
     this.draw();
+    this.mousePressed = false;
     return;
   }
 

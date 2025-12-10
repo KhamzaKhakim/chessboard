@@ -26,6 +26,8 @@ export type BoardPiece = {
   row: number;
   x: number;
   y: number;
+  dx?: number;
+  dy?: number;
 };
 
 export type BoardPieces = Map<string, BoardPiece>;
