@@ -196,17 +196,16 @@ export class Chessboard {
           this.size,
         );
 
-        console.log(this.currentPiece);
-        console.log(this.availableMoves);
-
         this.draw();
       } else if (this.currentPiece.color != tempPiece.color) {
+        this.pieceChosen = false;
         return;
         // piece with the same color
       } else {
         this.pieces.set(posKey(this.currentPiece), this.currentPiece);
         this.currentPiece = tempPiece;
         this.pieces.delete(posKey(row, col));
+        this.pieceChosen = false;
 
         this.currentPiece.x = e.offsetX - this.tileSize / 2;
         this.currentPiece.y = e.offsetY - this.tileSize / 2;
@@ -272,10 +271,11 @@ export class Chessboard {
         this.currentPiece.col = col;
 
         if (!this.mousePressed) {
+          //TODO: safari fps is somehow slower than chrome
           this.currentPiece.dx =
-            (col * this.tileSize - this.currentPiece.x) / 20;
+            (col * this.tileSize - this.currentPiece.x) / 10;
           this.currentPiece.dy =
-            (row * this.tileSize - this.currentPiece.y) / 20;
+            (row * this.tileSize - this.currentPiece.y) / 10;
           this.availableMoves = [];
           this.pieceChosen = false;
         } else {
