@@ -30,7 +30,7 @@ export function calculateAvailableMoves(
     const { col, row } = pos;
     let i = 1;
     while (up || down || left || right) {
-      if (i > size) return [];
+      if (i > size) return moves;
 
       //check if left is still ok
       if (left) {
@@ -97,7 +97,7 @@ export function calculateAvailableMoves(
     const { col, row } = pos;
     let i = 1;
     while (tl || tr || bl || br) {
-      if (i > size) return [];
+      if (i > size) return moves;
 
       if (tl) {
         //out of board
