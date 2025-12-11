@@ -75,7 +75,7 @@ export class Chessboard {
     //add event listeneres for canvas
     this.canvas.onmousedown = (e) => this.mouseDownHandler(e);
     this.canvas.onmouseup = (e) => this.mouseUpHandler(e);
-    this.canvas.onmouseout = (e) => this.mouseOutHandler(e);
+    // this.canvas.onmouseout = (e) => this.mouseOutHandler(e);
     this.canvas.onmousemove = (e) => this.mouseMoveHandler(e);
   }
 
@@ -109,19 +109,38 @@ export class Chessboard {
         this.currentPiece.y += this.currentPiece.dy || 0;
 
         //TODO: wip
-        // if (
-        //   this.currentPiece.dx > 0 &&
-        //   this.currentPiece.col * this.tileSize == this.currentPiece.x
-        // ) {
-        // }
+        if (
+          this.currentPiece.dx &&
+          this.currentPiece.dx < 0 &&
+          this.currentPiece.x <= this.currentPiece.col * this.tileSize
+        ) {
+          this.currentPiece.x = this.currentPiece.col * this.tileSize;
+          this.currentPiece.dx = 0;
+        } else if (
+          this.currentPiece.dx &&
+          this.currentPiece.dx > 0 &&
+          this.currentPiece.x >= this.currentPiece.col * this.tileSize
+        ) {
+          this.currentPiece.x = this.currentPiece.col * this.tileSize;
+          this.currentPiece.dx = 0;
+        }
 
-        // if (
-        //   this.currentPiece.row * this.tileSize == this.currentPiece.y &&
-        //   this.currentPiece.col * this.tileSize == this.currentPiece.x
-        // ) {
-        //   this.currentPiece.dx = undefined;
-        //   this.currentPiece.dy = undefined;
-        // }
+        if (
+          this.currentPiece.dy &&
+          this.currentPiece.dy < 0 &&
+          this.currentPiece.y <= this.currentPiece.row * this.tileSize
+        ) {
+          this.currentPiece.y = this.currentPiece.row * this.tileSize;
+          this.currentPiece.dy = 0;
+        } else if (
+          this.currentPiece.dy &&
+          this.currentPiece.dy > 0 &&
+          this.currentPiece.y >= this.currentPiece.row * this.tileSize
+        ) {
+          this.currentPiece.y = this.currentPiece.row * this.tileSize;
+          this.currentPiece.dy = 0;
+        }
+
         drawCurrentPiece(
           this.currentPiece,
           this.ctx,
@@ -129,9 +148,12 @@ export class Chessboard {
           this.svgPieces,
         );
 
-        console.log(this.currentPiece.y, this.currentPiece.row * this.tileSize);
+        if (!this.currentPiece.dx && !this.currentPiece.dy) {
+          this.pieces.set(posKey(this.currentPiece), this.currentPiece);
+          this.currentPiece = null;
+        }
 
-        this.draw();
+        requestAnimationFrame(() => this.draw());
       } else {
         drawCurrentPiece(
           this.currentPiece,
@@ -174,9 +196,14 @@ export class Chessboard {
           this.size,
         );
 
+        console.log(this.currentPiece);
+        console.log(this.availableMoves);
+
         this.draw();
-      } else if (this.currentPiece.color == tempPiece.color) {
+      } else if (this.currentPiece.color != tempPiece.color) {
+        return;
         // piece with the same color
+      } else {
         this.pieces.set(posKey(this.currentPiece), this.currentPiece);
         this.currentPiece = tempPiece;
         this.pieces.delete(posKey(row, col));
@@ -231,7 +258,6 @@ export class Chessboard {
       );
 
       if (!isMoveAvailable) {
-        console.log(this.mousePressed);
         this.currentPiece.x = this.currentPiece.col * this.tileSize;
         this.currentPiece.y = this.currentPiece.row * this.tileSize;
 
@@ -244,11 +270,14 @@ export class Chessboard {
         //TODO: if mouse not pressed animate
         this.currentPiece.row = row;
         this.currentPiece.col = col;
+
         if (!this.mousePressed) {
           this.currentPiece.dx =
-            (col * this.tileSize - this.currentPiece.x) / 100;
+            (col * this.tileSize - this.currentPiece.x) / 20;
           this.currentPiece.dy =
-            (row * this.tileSize - this.currentPiece.y) / 100;
+            (row * this.tileSize - this.currentPiece.y) / 20;
+          this.availableMoves = [];
+          this.pieceChosen = false;
         } else {
           this.currentPiece.x = col * this.tileSize;
           this.currentPiece.y = row * this.tileSize;
@@ -265,20 +294,20 @@ export class Chessboard {
     return;
   }
 
-  private mouseOutHandler(e: MouseEvent) {
-    if (!this.currentPiece) return;
-    e.preventDefault();
+  // private mouseOutHandler(e: MouseEvent) {
+  //   if (!this.currentPiece) return;
+  //   e.preventDefault();
 
-    //go back to previous position
-    //TODO: remove maybe
-    this.currentPiece.x = this.currentPiece.col * this.tileSize;
-    this.currentPiece.y = this.currentPiece.row * this.tileSize;
-    this.mousePressed = false;
+  //   //go back to previous position
+  //   //TODO: remove maybe
+  //   this.currentPiece.x = this.currentPiece.col * this.tileSize;
+  //   this.currentPiece.y = this.currentPiece.row * this.tileSize;
+  //   this.mousePressed = false;
 
-    // this.availableMoves = [];
-    // this.currentPiece = null;
-    this.draw();
-  }
+  //   // this.availableMoves = [];
+  //   // this.currentPiece = null;
+  //   this.draw();
+  // }
 
   private mouseMoveHandler(e: MouseEvent) {
     if (!this.mousePressed || !this.currentPiece) return;
