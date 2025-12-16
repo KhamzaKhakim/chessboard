@@ -74,6 +74,8 @@ export function getCellFromMouse({
   const row = Math.floor(e.offsetY / tileSize);
   const col = Math.floor(e.offsetX / tileSize);
 
+  // console.log(posToFen(row, col));
+
   return { row, col };
 }
 
@@ -86,4 +88,19 @@ export function posKey(row: number, col: number): string;
 export function posKey(pieceOrRow: BoardPiece | number, col?: number): string {
   if (typeof pieceOrRow == "number") return `${pieceOrRow}-${col}`;
   else return `${pieceOrRow.row}-${pieceOrRow.col}`;
+}
+
+const aCharCode = 97;
+
+//need size for now hardcoded 8
+export function posToFen(piece: BoardPiece): string;
+export function posToFen(row: number, col: number): string;
+export function posToFen(
+  pieceOrRow: BoardPiece | number,
+  col?: number,
+): string {
+  if (typeof pieceOrRow == "number" && col)
+    return `${String.fromCharCode(col + aCharCode)}-${Math.abs(pieceOrRow - 8)}`;
+  else
+    return `${String.fromCharCode((pieceOrRow as BoardPiece).row)}-${(pieceOrRow as BoardPiece).col}`;
 }
