@@ -259,6 +259,7 @@ export class Chessboard {
       if (!isMoveAvailable) {
         this.currentPiece.x = this.currentPiece.col * this.tileSize;
         this.currentPiece.y = this.currentPiece.row * this.tileSize;
+        this.pieceChosen = false;
 
         if (!this.mousePressed) {
           this.pieces.set(posKey(this.currentPiece), this.currentPiece);
