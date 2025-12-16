@@ -1,6 +1,7 @@
 import { FenPiece, FEN_PIECES, Color, BoardPiece } from "./types.js";
 
-export const startPositon = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+export const startPositon =
+  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
 
 export const pieceToName: Record<(typeof FEN_PIECES)[number], string> = {
   k: "black king",
@@ -92,10 +93,11 @@ export function posKey(pieceOrRow: BoardPiece | number, col?: number): string {
 
 const aCharCode = 97;
 
+//https://www.chess.com/terms/chess-notation
 //need size for now hardcoded 8
-export function posToFen(piece: BoardPiece): string;
-export function posToFen(row: number, col: number): string;
-export function posToFen(
+export function writeNotation(piece: BoardPiece): string;
+export function writeNotation(row: number, col: number): string;
+export function writeNotation(
   pieceOrRow: BoardPiece | number,
   col?: number,
 ): string {

@@ -17,6 +17,13 @@ export class Chessboard {
   private ref: string;
   private size: number;
   private fen: string;
+  private simpleFen: string;
+  private whoseMove: "w" | "b";
+  private castleOptions: string;
+  private enPassantSquare: string;
+  private halfMoveClock: number;
+  private fullmoveNumber: number;
+
   private svgPieces: Record<string, HTMLImageElement> | null = null;
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
@@ -43,11 +50,36 @@ export class Chessboard {
     this.ctx = canvas.getContext("2d")!;
 
     this.tileSize = this.canvas.width / this.size;
+
+    const fenValues = fen.split(" ");
+
+    //TODO validate fen?
+    //https://www.chess.com/ru/terms/fen
+
+    this.simpleFen = fenValues[0];
+
+    this.whoseMove = (fenValues[1] as "w" | "b") ?? "w";
+
+    this.castleOptions = fenValues[1] ?? "KQkq";
+
+    this.enPassantSquare = "-";
+    this.halfMoveClock = 0;
+    this.fullmoveNumber = 0;
   }
 
   async init() {
     await this.setup();
     this.draw();
+
+    console.log(
+      JSON.stringify({
+        whoseMove: this.whoseMove,
+        castleOptions: this.castleOptions,
+        enPassantSquare: this.enPassantSquare,
+        halfMoveClock: this.halfMoveClock,
+        fullmoveNumber: this.fullmoveNumber,
+      }),
+    );
   }
 
   private async setup() {
@@ -58,7 +90,7 @@ export class Chessboard {
 
     const tempPieces = new Map<string, BoardPiece>();
 
-    iteratePieces(this.fen, ({ fenPiece, row, col }) => {
+    iteratePieces(this.simpleFen, ({ fenPiece, row, col }) => {
       tempPieces.set(posKey(row, col), {
         start: posKey(row, col),
         fenPiece,
