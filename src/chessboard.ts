@@ -26,6 +26,7 @@ export class Chessboard {
 
   private svgPieces: Record<string, HTMLImageElement> | null = null;
   private canvas: HTMLCanvasElement;
+  private logs: HTMLDivElement;
   private ctx: CanvasRenderingContext2D;
   private pieces: BoardPieces = new Map<string, BoardPiece>();
   private tileSize: number;
@@ -65,6 +66,8 @@ export class Chessboard {
     this.enPassantSquare = "-";
     this.halfMoveClock = 0;
     this.fullmoveNumber = 0;
+
+    this.logs = document.getElementById("logs") as HTMLDivElement;
   }
 
   async init() {
@@ -194,6 +197,11 @@ export class Chessboard {
           this.svgPieces,
         );
       }
+
+    this.logs.textContent = JSON.stringify({
+      fen: this.fen,
+      whoseMove: this.whoseMove,
+    });
   }
 
   private mouseDownHandler(e: MouseEvent) {

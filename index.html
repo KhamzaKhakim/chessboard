@@ -5,7 +5,10 @@
   <body>
     <p>Chessboard in dev</p>
     <p id="playerName"></p>
-    <canvas id="board" width="480" height="480"></canvas>
+    <div style="display: flex">
+      <canvas id="board" width="480" height="480"></canvas>
+      <div id="logs"></div>
+    </div>
     <script type="module">
       import { Chessboard } from "./dist/chessboard.js";
       const cb = new Chessboard(
