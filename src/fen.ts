@@ -1,5 +1,20 @@
-// import { BoardPiece } from "./types.js";
+import { BoardPiece, Move, Position } from "./types.js";
 
-// export function updateFen({ pieces }: { pieces: BoardPiece[] }) {
-//   return true;
-// }
+//8 sized board for now
+//need to call before update on currentPiece
+export function updateFen({
+  currentPiece,
+  move,
+  oldFen,
+}: {
+  currentPiece: BoardPiece;
+  move: Position;
+  oldFen: string;
+}) {
+  const tempFenArr = oldFen.split("/");
+  const cols = tempFenArr[currentPiece.row];
+
+  // for(let i = 0; i < tempFenArr)
+
+  return true;
+}
