@@ -5,24 +5,26 @@ import {
   preloadPieces,
 } from "./image.js";
 import { calculateAvailableMoves } from "./moves.js";
-import { BoardPiece, FEN_PIECES, Move, BoardPieces } from "./types.js";
+import { BoardPiece, FEN_PIECES, Move, BoardPieces, Color } from "./types.js";
 import {
   getCellFromMouse,
   getColorFromFenPie,
   iteratePieces,
   posKey,
   startPositon,
+  writeNotation,
 } from "./utils.js";
 export class Chessboard {
   private ref: string;
   private size: number;
   private fen: string;
   private simpleFen: string;
-  private whoseMove: "w" | "b";
+  private whoseMove: Color;
   private castleOptions: string;
   private enPassantSquare: string;
   private halfMoveClock: number;
   private fullmoveNumber: number;
+  private notationHistory: string[];
 
   private svgPieces: Record<string, HTMLImageElement> | null = null;
   private canvas: HTMLCanvasElement;
@@ -38,7 +40,6 @@ export class Chessboard {
   constructor(ref: string, size: number = 8, fen: string = startPositon) {
     this.ref = ref;
     this.size = size;
-    this.fen = fen;
 
     const canvas = document.getElementById(this.ref);
 
@@ -67,22 +68,22 @@ export class Chessboard {
     this.halfMoveClock = 0;
     this.fullmoveNumber = 0;
 
+    this.fen = [
+      this.simpleFen,
+      this.whoseMove,
+      this.castleOptions,
+      this.enPassantSquare,
+      this.halfMoveClock,
+      this.fullmoveNumber,
+    ].join(" ");
+
     this.logs = document.getElementById("logs") as HTMLDivElement;
+    this.notationHistory = [];
   }
 
   async init() {
     await this.setup();
     this.draw();
-
-    console.log(
-      JSON.stringify({
-        whoseMove: this.whoseMove,
-        castleOptions: this.castleOptions,
-        enPassantSquare: this.enPassantSquare,
-        halfMoveClock: this.halfMoveClock,
-        fullmoveNumber: this.fullmoveNumber,
-      }),
-    );
   }
 
   private async setup() {
@@ -115,7 +116,6 @@ export class Chessboard {
   }
 
   private draw() {
-    if (!this.pieces) return;
     if (!this.svgPieces) {
       throw new Error("Preloaded images not found");
     }
@@ -185,6 +185,9 @@ export class Chessboard {
 
         if (!this.currentPiece.dx && !this.currentPiece.dy) {
           this.pieces.set(posKey(this.currentPiece), this.currentPiece);
+          this.notationHistory.push(
+            writeNotation(this.size, this.currentPiece),
+          );
           this.currentPiece = null;
         }
 
@@ -201,6 +204,7 @@ export class Chessboard {
     this.logs.textContent = JSON.stringify({
       fen: this.fen,
       whoseMove: this.whoseMove,
+      notationHistory: this.notationHistory,
     });
   }
 
@@ -224,6 +228,10 @@ export class Chessboard {
     if (tempPiece) {
       // no selected piece
       if (!this.currentPiece) {
+        if (this.whoseMove != tempPiece.color) {
+          return;
+        }
+
         this.currentPiece = tempPiece;
         this.pieces.delete(posKey(row, col));
 
@@ -312,6 +320,7 @@ export class Chessboard {
         this.currentPiece.col = col;
 
         if (!this.mousePressed) {
+          //move by click
           //TODO: safari fps is somehow slower than chrome
           this.currentPiece.dx =
             (col * this.tileSize - this.currentPiece.x) / 10;
@@ -320,14 +329,23 @@ export class Chessboard {
           this.availableMoves = [];
           this.pieceChosen = false;
         } else {
+          //move by drag
           this.currentPiece.x = col * this.tileSize;
           this.currentPiece.y = row * this.tileSize;
 
           this.pieces.set(posKey(this.currentPiece), this.currentPiece);
+
+          this.notationHistory.push(
+            writeNotation(this.size, this.currentPiece),
+          );
+
           this.currentPiece = null;
           this.availableMoves = [];
           this.pieceChosen = false;
         }
+
+        //after move was done
+        this.whoseMove = this.whoseMove == "w" ? "b" : "w";
       }
     }
     this.draw();

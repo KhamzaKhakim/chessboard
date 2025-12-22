@@ -81,7 +81,7 @@ export function getCellFromMouse({
 }
 
 export function getColorFromFenPie(piece: FenPiece): Color {
-  return piece == piece.toUpperCase() ? "white" : "black";
+  return piece == piece.toUpperCase() ? "w" : "b";
 }
 
 export function posKey(piece: BoardPiece): string;
@@ -95,14 +95,19 @@ const aCharCode = 97;
 
 //https://www.chess.com/terms/chess-notation
 //need size for now hardcoded 8
-export function writeNotation(piece: BoardPiece): string;
-export function writeNotation(row: number, col: number): string;
+export function writeNotation(boardSize: number, piece: BoardPiece): string;
 export function writeNotation(
+  boardSize: number,
+  row: number,
+  col: number,
+): string;
+export function writeNotation(
+  boardSize: number,
   pieceOrRow: BoardPiece | number,
   col?: number,
 ): string {
   if (typeof pieceOrRow == "number" && col)
-    return `${String.fromCharCode(col + aCharCode)}-${Math.abs(pieceOrRow - 8)}`;
+    return `${String.fromCharCode(col + aCharCode)}${Math.abs(pieceOrRow - boardSize)}`;
   else
-    return `${String.fromCharCode((pieceOrRow as BoardPiece).row)}-${(pieceOrRow as BoardPiece).col}`;
+    return `${String.fromCharCode((pieceOrRow as BoardPiece).col + aCharCode)}${Math.abs((pieceOrRow as BoardPiece).row - boardSize)}`;
 }

@@ -14,7 +14,7 @@ export const FEN_PIECES = [
   "P", //white pawn
 ] as const;
 
-export type Color = "white" | "black";
+export type Color = "w" | "b";
 
 export type FenPiece = (typeof FEN_PIECES)[number];
 

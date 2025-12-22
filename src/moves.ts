@@ -171,7 +171,7 @@ export function calculateAvailableMoves(
     const moves: Position[] = [];
 
     const { row, col } = pos;
-    if (currentPiece.color == "white") {
+    if (currentPiece.color == "w") {
       if (!pieces.has(posKey(row - 1, col))) {
         moves.push({ row: row - 1, col: col });
       }
