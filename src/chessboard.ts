@@ -1,3 +1,4 @@
+import { getNewFen } from "./fen.js";
 import {
   drawCurrentPiece,
   drawMoves,
@@ -188,6 +189,10 @@ export class Chessboard {
           this.notationHistory.push(
             writeNotation(this.size, this.currentPiece),
           );
+
+          this.simpleFen = getNewFen({
+            pieces: Array.from(this.pieces.values()),
+          });
           this.currentPiece = null;
         }
 
@@ -338,6 +343,10 @@ export class Chessboard {
           this.notationHistory.push(
             writeNotation(this.size, this.currentPiece),
           );
+
+          this.simpleFen = getNewFen({
+            pieces: Array.from(this.pieces.values()),
+          });
 
           this.currentPiece = null;
           this.availableMoves = [];

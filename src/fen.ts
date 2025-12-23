@@ -1,20 +1,28 @@
-import { BoardPiece, Move, Position } from "./types.js";
+import { BoardPiece } from "./types.js";
 
 //8 sized board for now
 //need to call before update on currentPiece
-export function updateFen({
-  currentPiece,
-  move,
-  oldFen,
-}: {
-  currentPiece: BoardPiece;
-  move: Position;
-  oldFen: string;
-}) {
-  const tempFenArr = oldFen.split("/");
-  const cols = tempFenArr[currentPiece.row];
+export function getNewFen({ pieces }: { pieces: BoardPiece[] }) {
+  let tempFenArr =
+    "11111111/11111111/11111111/11111111/11111111/11111111/11111111/11111111";
 
-  // for(let i = 0; i < tempFenArr)
+  for (const piece of pieces) {
+    tempFenArr = replaceAt(
+      tempFenArr,
+      piece.row * 9 + piece.col,
+      piece.fenPiece,
+    );
+  }
 
-  return true;
+  tempFenArr = tempFenArr.replace(/1+/g, (match) => match.length.toString());
+
+  return tempFenArr;
+}
+
+export function replaceAt(str: string, index: number, replacement: string) {
+  return (
+    str.substring(0, index) +
+    replacement +
+    str.substring(index + replacement.length)
+  );
 }
