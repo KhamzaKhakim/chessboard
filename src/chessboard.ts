@@ -18,7 +18,6 @@ import {
 export class Chessboard {
   private ref: string;
   private size: number;
-  private fen: string;
   private simpleFen: string;
   private whoseMove: Color;
   private castleOptions: string;
@@ -69,7 +68,12 @@ export class Chessboard {
     this.halfMoveClock = 0;
     this.fullmoveNumber = 0;
 
-    this.fen = [
+    this.logs = document.getElementById("logs") as HTMLDivElement;
+    this.notationHistory = [];
+  }
+
+  get fen(): string {
+    return [
       this.simpleFen,
       this.whoseMove,
       this.castleOptions,
@@ -77,9 +81,6 @@ export class Chessboard {
       this.halfMoveClock,
       this.fullmoveNumber,
     ].join(" ");
-
-    this.logs = document.getElementById("logs") as HTMLDivElement;
-    this.notationHistory = [];
   }
 
   async init() {
