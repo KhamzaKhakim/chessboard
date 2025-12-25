@@ -36,6 +36,8 @@ export class Chessboard {
   private mousePressed = false;
   private currentPiece: BoardPiece | null = null;
   private availableMoves: Move[] = [];
+  private finished = false;
+  private check = false;
 
   constructor(ref: string, size: number = 8, fen: string = startPositon) {
     this.ref = ref;
@@ -320,7 +322,16 @@ export class Chessboard {
           this.availableMoves = [];
         }
       } else {
-        //TODO: if mouse not pressed animate
+        //making a move
+
+        //TODO: check for check, checkmate
+        // isCheckOrMate(this.whoseMove, [
+        //   ...this.pieces.values(),
+        //   this.currentPiece,
+        // ]);
+
+        // if i do after a move i can see all the pieces it would be easier for discovered checks
+
         this.notationHistory.push(
           writeNotation({
             currentPiece: this.currentPiece,
