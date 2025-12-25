@@ -1,4 +1,4 @@
-import { FenPiece, FEN_PIECES, Color, BoardPiece } from "./types.js";
+import { FenPiece, FEN_PIECES, Color, BoardPiece, Move } from "./types.js";
 
 export const startPositon =
   "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
@@ -93,21 +93,32 @@ export function posKey(pieceOrRow: BoardPiece | number, col?: number): string {
 
 const aCharCode = 97;
 
-//https://www.chess.com/terms/chess-notation
-//need size for now hardcoded 8
-export function writeNotation(boardSize: number, piece: BoardPiece): string;
-export function writeNotation(
-  boardSize: number,
-  row: number,
-  col: number,
-): string;
-export function writeNotation(
-  boardSize: number,
-  pieceOrRow: BoardPiece | number,
-  col?: number,
-): string {
-  if (typeof pieceOrRow == "number" && col)
-    return `${String.fromCharCode(col + aCharCode)}${Math.abs(pieceOrRow - boardSize)}`;
-  else
-    return `${String.fromCharCode((pieceOrRow as BoardPiece).col + aCharCode)}${Math.abs((pieceOrRow as BoardPiece).row - boardSize)}`;
+export function writeNotation({
+  currentPiece,
+  pieces,
+  move,
+  boardSize,
+}: {
+  currentPiece: BoardPiece;
+  pieces: BoardPiece[];
+  move: Move;
+  boardSize: number;
+}): string {
+  let notation = `${String.fromCharCode(move.col + aCharCode)}${Math.abs(move.row - boardSize)}`;
+
+  if (move.capture) {
+    notation = "x" + notation;
+
+    if (currentPiece.fenPiece.toUpperCase() == "P") {
+      notation = String.fromCharCode(currentPiece.col + aCharCode) + notation;
+    }
+  }
+
+  if (currentPiece.fenPiece.toUpperCase() != "P") {
+    notation = currentPiece.fenPiece.toUpperCase() + notation;
+  }
+
+  //if capture happened i need to add current_piece_fen_x_notation
+
+  return notation;
 }

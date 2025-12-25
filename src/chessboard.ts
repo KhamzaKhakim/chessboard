@@ -187,9 +187,9 @@ export class Chessboard {
 
         if (!this.currentPiece.dx && !this.currentPiece.dy) {
           this.pieces.set(posKey(this.currentPiece), this.currentPiece);
-          this.notationHistory.push(
-            writeNotation(this.size, this.currentPiece),
-          );
+          // this.notationHistory.push(
+          //   writeNotation(this.size, this.currentPiece),
+          // );
 
           this.simpleFen = getNewFen({
             pieces: Array.from(this.pieces.values()),
@@ -305,12 +305,11 @@ export class Chessboard {
 
       this.pieceChosen = true;
     } else {
-      //TODO: improve moveAvailabe finding
-      const isMoveAvailable = !!this.availableMoves.find(
+      const availableMove = this.availableMoves.find(
         (m) => m.row == row && col == m.col,
       );
 
-      if (!isMoveAvailable) {
+      if (!availableMove) {
         this.currentPiece.x = this.currentPiece.col * this.tileSize;
         this.currentPiece.y = this.currentPiece.row * this.tileSize;
         this.pieceChosen = false;
@@ -322,6 +321,15 @@ export class Chessboard {
         }
       } else {
         //TODO: if mouse not pressed animate
+        this.notationHistory.push(
+          writeNotation({
+            currentPiece: this.currentPiece,
+            pieces: Array.from(this.pieces.values()),
+            move: availableMove,
+            boardSize: this.size,
+          }),
+        );
+
         this.currentPiece.row = row;
         this.currentPiece.col = col;
 
@@ -340,10 +348,6 @@ export class Chessboard {
           this.currentPiece.y = row * this.tileSize;
 
           this.pieces.set(posKey(this.currentPiece), this.currentPiece);
-
-          this.notationHistory.push(
-            writeNotation(this.size, this.currentPiece),
-          );
 
           this.simpleFen = getNewFen({
             pieces: Array.from(this.pieces.values()),
