@@ -1,4 +1,12 @@
-import { FenPiece, FEN_PIECES, Color, BoardPiece, Move } from "./types.js";
+import { calculateAvailableMoves } from "./moves.js";
+import {
+  FenPiece,
+  FEN_PIECES,
+  Color,
+  BoardPiece,
+  Move,
+  BoardPieces,
+} from "./types.js";
 
 export const startPositon =
   "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
@@ -100,25 +108,44 @@ export function writeNotation({
   boardSize,
 }: {
   currentPiece: BoardPiece;
-  pieces: BoardPiece[];
+  pieces: BoardPieces;
   move: Move;
   boardSize: number;
 }): string {
+  //TODO: long castle, short castle, check(+), mate(#)
   let notation = `${String.fromCharCode(move.col + aCharCode)}${Math.abs(move.row - boardSize)}`;
 
   if (move.capture) {
     notation = "x" + notation;
+  }
 
-    if (currentPiece.fenPiece.toUpperCase() == "P") {
-      notation = String.fromCharCode(currentPiece.col + aCharCode) + notation;
+  const sameMovePieces = [...pieces.values()]
+    .filter((p) => currentPiece.fenPiece === p.fenPiece)
+    .filter((p) =>
+      calculateAvailableMoves(p, pieces, boardSize).find(
+        (m) => m.col == move.col && m.row == move.row,
+      ),
+    );
+
+  if (sameMovePieces.length) {
+    if (length > 1) {
+      notation =
+        `${String.fromCharCode(currentPiece.col + aCharCode)}${Math.abs(currentPiece.row - boardSize)}` +
+        notation;
+    } else {
+      if (sameMovePieces[0].col != currentPiece.col) {
+        notation = String.fromCharCode(currentPiece.col + aCharCode) + notation;
+      } else {
+        notation = Math.abs(currentPiece.row - boardSize) + notation;
+      }
     }
+  } else if (currentPiece.fenPiece.toUpperCase() == "P" && move.capture) {
+    notation = String.fromCharCode(currentPiece.col + aCharCode) + notation;
   }
 
   if (currentPiece.fenPiece.toUpperCase() != "P") {
     notation = currentPiece.fenPiece.toUpperCase() + notation;
   }
-
-  //if capture happened i need to add current_piece_fen_x_notation
 
   return notation;
 }

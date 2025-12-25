@@ -324,7 +324,7 @@ export class Chessboard {
         this.notationHistory.push(
           writeNotation({
             currentPiece: this.currentPiece,
-            pieces: Array.from(this.pieces.values()),
+            pieces: this.pieces,
             move: availableMove,
             boardSize: this.size,
           }),
